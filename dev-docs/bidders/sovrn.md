@@ -23,8 +23,14 @@ sidebarType: 1
 - [Introduction](#introduction)
 - [Client-side Integration](#client-side)
 - [Server-side Integration](#server-side)
-- [Display Bid Params](#display)
-- [Video Bid Params](#video)
+- [Bid Params (Display and Video)](#bid-params)
+  - [Notes for Display](#notes-for-display)
+- [Video-Specific Bid Params](#video)
+  - [MIME Types](#mime-types)
+  - [Playback Methods](#playback-methods)
+  - [Playback Cessation Modes](#playback-cessation-modes)
+  - [Ad Position](#ad-position)
+  - [API Framework](#sovrn-api-framework)
 - [Examples](#examples)
 
 <a name="introduction" />
@@ -45,7 +51,18 @@ The Sovrn ad exchange relies on the ad unit format where banner and video proper
 3. Define your ad units in the adUnit object. Sovrn requires you use the Zone ID for this parameter. For more information about this object, see Prebid’s [Ad Unit Reference](https://docs.prebid.org/dev-docs/adunit-reference.html) documentation.
 4. Enable user syncing by adding the following code in the pbjs.setConfig() function. Sovrn strongly recommends enabling user syncing through iFrames, though we do also support image-based syncing. This functionality improves DSP user match rates and increases the Index bid rate and bid price. Make sure to call pbjs.setConfig() only once. This configuration is optional in Prebid, but highly recommended by Sovrn.
 
-INSERT CODE HERE???
+```
+pbjs.setConfig({
+    userSync: {
+        filterSettings: {
+            iframe: {
+                bidders: 'sovrn',   
+                filter: 'include'
+            }
+        }
+    }
+});
+```
 
 <a name="server-side" />
 
@@ -67,17 +84,48 @@ adapters.sovrn.endpoint=http://<Your Prebid Server Host's URL>
 4. Enable user syncing by adding the following code in the `pbjs.setConfig()` function. Sovrn strongly recommends enabling user syncing through iFrames, though we do also support image-based syncing. This functionality improves DSP user match rates and increases bid rate and bid price. Be sure to call `pbjs.setConfig()` only once. This configuration is optional in Prebid, but highly recommended by Sovrn.
 5. Ensure that you are utilizing the `pbs.lijit.com` endpoint for your Sovrn connection.
 
-CONFIRM #5 IS CORRECT
+<a name="bid-params" />
 
 ### Bid Params
+**Bid parameters for display and video**
 
 {: .table .table-bordered .table-striped }
 | Name       | Scope    | Description          | Example    | Type     |
 |------------|----------|----------------------|------------|----------|
-| `tagid`    | required | The sovrn Ad Tag ID  | `'315045'` | `string` |
-| `bidfloor` | optional | Bid floor in dollars | `'0.04'`   | `string` |
+| `tagid`            | required | The sovrn Ad Tag ID  | `'315045'` | `string` |
+| `bidfloor`         | optional | Bid floor in dollars. This will override any settings defined in the Sovrn Platform. If no bidfloor is set here or defined in the Sovrn Platform, it defaults to 0. | `0.04` | `float` |
+| `domain`           | required | Must be a domain that has been submitted and approved in your Sovrn account in order to monetize.  | `"abc.com"` | `string` |
+| `site.publisher.id`| optional | Sovrn publisher id, which can be found in your Sovrn account.  | `'315045'` | `string` |
+| `user.buyeruid`    | required | Buyer-specific ID for the user as mapped by the exchange for the buyer (hashed).   | `"a303ebccfb5cf5c32610b15c"` | `string` |
 
-Bid Params for video ads. These params should be added to `mediatype.video`.
+<a name="notes-for-display" />
+
+#### Notes for Display
+
+How to view bid requests sent to Sovrn:
+1. Go to a page with Sovrn ads. A good example is [worldhistory.org](https://www.worldhistory.org/)
+2. Open the Developer tools.
+3. In Developer tools, click the Network tab.
+4. In the Network tab, search for requests sent to lijit.com.
+
+Recommended Global Bidder settings: 
+- Sovrn recommends enabling local storage. As of Prebid.js 7.x, local storage access must be explicitly specified. By leveraging local storage, Sovrn is able to take advantage of the latest features our exchange has to offer. For instructions on enabling local storage, see Prebid’s pbjs.bidderSettings documentation.
+- Example: 
+```
+pbjs.bidderSettings = { 
+  sovrn: { 
+      storageAllowed: true 
+  } 
+};
+```
+
+
+
+
+<a name="video" />
+
+### Video-specific Bid Params
+**Bid Pparameters for video ads. These params should be added to `mediatype.video`.**
 
 {: .table .table-bordered .table-striped }
 | Name             | Scope       | Description                                                                                                                    | Example         | Type            |
@@ -107,24 +155,24 @@ Bid Params for video ads. These params should be added to `mediatype.video`.
 | `api`            | recommended | List of supported API frameworks for this impression. Refer to [API Frameworks](#sovrn-api-frameworks)                               | `[1, 2, 3]`     | `integer array` |
  
 
-### Note
+*note:
+[Protocols list](https://github.com/InteractiveAdvertisingBureau/AdCOM/blob/master/AdCOM%20v1.0%20FINAL.md#list--creative-subtypes---audiovideo-)
 
-[Protocols list](#epsilon-protocols)
+<a name="mime-types" />
+#### MIME types
 
-#### MIME types:
+With VPAID2
+- video/mp4
+- video/3gpp
+- application/javascript
 
-##### With VPAID2:  
+Without VPAID
+- video/mp4
+- video/3gpp
 
-video/mp4,
-video/3gpp,
-application/javascript
+<a name="playback-methods" />
 
-##### Without VPAID2:
-
-video/mp4,
-video/3gpp
-
-#### Video Playback Methods:
+#### Playback Methods
 
 {: .table .table-bordered .table-striped }
 | Value | Description                                              |
@@ -136,7 +184,9 @@ video/3gpp
 | `5`   | Initiates on Entering Viewport with Sound On             |
 | `6`   | Initiates on Entering Viewport with Sound Off by Default |
 
-#### Playback Cessation Modes:
+<a name="playback-cessation-modes" />
+
+#### Playback Cessation Modes
 
 {: .table .table-bordered .table-striped }
 | Value | Description                                                                                               |
@@ -145,7 +195,9 @@ video/3gpp
 | `2`   | On Leaving Viewport or when Terminated by User                                                            |
 | `3`   | On Leaving Viewport Continues as a Floating/Slider Unit until Video Completion or when Terminated by User |
 
-#### Ad Position:
+<a name="ad-position" />
+
+#### Ad Position
 
 {: .table .table-bordered .table-striped }
 | Value | Description    |
@@ -160,7 +212,9 @@ video/3gpp
 | `7`   | Full Screen    |
 
 <a id="sovrn-api-frameworks"></a>
-#### API Frameworks:
+<a name="sovrn-api-frameworks" />
+
+#### API Frameworks
 
 {: .table .table-bordered .table-striped }
 | Value | Description |
@@ -172,12 +226,28 @@ video/3gpp
 | `5`   | MRAID-2     |
 | `6`   | MRAID-3     |
 
-Source: [OpenRTB scpecification](https://www.iab.com/wp-content/uploads/2016/03/OpenRTB-API-Specification-Version-2-5-FINAL.pdf)
+*source: [OpenRTB scpecification](https://iabtechlab.com/wp-content/uploads/2022/04/OpenRTB-2-6_FINAL.pdf)
 
-### Example
-Below are example JavaScript objects that the Sovrn adapter will translate into JSON.
+<a name="examples" />
 
-#### Video instream adUnit
+### Examples
+**Below are example JavaScript objects.** The Sovrn adapter will translate these into JSON.
+
+#### Display
+
+```
+    var bannerAdUnit = {
+      code: 'banner-div',
+      sizes: [[300, 250]],
+      bids: [{
+        bidder: 'sovrn',
+        params: {
+          tagid: '315045'
+        }
+      }]
+    }
+```
+#### Video instream
 
 ```
     var instreamAdUnit = {
@@ -199,7 +269,7 @@ Below are example JavaScript objects that the Sovrn adapter will translate into 
       }]
     }
 ```
-#### Video outstream adUnit
+#### Video outstream
 
 ```
     var outstreamAdUnit = {
@@ -221,17 +291,4 @@ Below are example JavaScript objects that the Sovrn adapter will translate into 
       }]
     },
 ```
-#### Banner adUnit
 
-```
-    var bannerAdUnit = {
-      code: 'banner-div',
-      sizes: [[300, 250]],
-      bids: [{
-        bidder: 'sovrn',
-        params: {
-          tagid: '315045'
-        }
-      }]
-    }
-```
