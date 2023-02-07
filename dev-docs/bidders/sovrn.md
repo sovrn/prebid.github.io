@@ -13,8 +13,61 @@ schain_supported: true
 gvl_id: 13
 floors_supported: true
 media_types: banner, video
+multiformat_supported: yes
+safeframes_ok: no
 sidebarType: 1
 ---
+
+### Table of contents
+
+- [Introduction](#introduction)
+- [Client-side Integration](#client-side)
+- [Server-side Integration](#server-side)
+- [Display Bid Params](#display)
+- [Video Bid Params](#video)
+- [Examples](#examples)
+
+<a name="introduction" />
+
+### Introduction
+**Publishers may access the Sovrn ad network through our Prebid.js and Prebid Server adapters.** 
+
+Both of these modules are GDPR and CCPA compliant.
+The Sovrn ad exchange relies on the ad unit format where banner and video properties, including the size parameter, are stored in the `adUnits[].mediaTypes` object.
+
+<a name="client-side" />
+
+### Client-side Integration
+**Set up Prebid.js to call Sovrn directly from the browser.**
+
+1. Download [Prebid.js](https://docs.prebid.org/download.html) from the Prebid site to use the standard compiled binary that Prebid includes in the download process and select Sovrn as an adapter.
+2. Define the Sovrn-specific parameters at the bidder level including setting `sovrn` as the bidder. For Sovrn bidder-specific parameters, see the Bid request parameters section below, and the examples at the end of this article.
+3. Define your ad units in the adUnit object. Sovrn requires you use the Zone ID for this parameter. For more information about this object, see Prebid’s [Ad Unit Reference](https://docs.prebid.org/dev-docs/adunit-reference.html) documentation.
+4. Enable user syncing by adding the following code in the pbjs.setConfig() function. Sovrn strongly recommends enabling user syncing through iFrames, though we do also support image-based syncing. This functionality improves DSP user match rates and increases the Index bid rate and bid price. Make sure to call pbjs.setConfig() only once. This configuration is optional in Prebid, but highly recommended by Sovrn.
+
+INSERT CODE HERE???
+
+<a name="server-side" />
+
+### Server-side Integration
+**Set up Prebid.js to call Sovrn through Prebid Server.**
+
+In this configuration, Prebid.js makes a call to Prebid Server and then Prebid Server uses our server-side adapter to call Sovrn. Complete the following steps to complete the Sovrn-specific configuration:
+
+In your PrebidServer adapter configuration Prebid.js, you must enable the Sovrn adapter as follows:
+
+```
+adapters.sovrn.enabled=true
+adapters.sovrn.endpoint=http://<Your Prebid Server Host's URL>
+```
+
+1. In the `pbjs.setConfig()` function, within the `s2sConfig` property, add `sovrn` to the `bidders` attribute.
+2. Define the Sovrn-specific parameters at the bidder level. For Sovrn's bidder-specific parameters, see the examples section below.
+3. Define your ad units in the `adUnit` object. For more information about this object, see Prebid’s [Ad Unit Reference](https://docs.prebid.org/dev-docs/adunit-reference.html) documentation.
+4. Enable user syncing by adding the following code in the `pbjs.setConfig()` function. Sovrn strongly recommends enabling user syncing through iFrames, though we do also support image-based syncing. This functionality improves DSP user match rates and increases bid rate and bid price. Be sure to call `pbjs.setConfig()` only once. This configuration is optional in Prebid, but highly recommended by Sovrn.
+5. Ensure that you are utilizing the `pbs.lijit.com` endpoint for your Sovrn connection.
+
+CONFIRM #5 IS CORRECT
 
 ### Bid Params
 
@@ -122,6 +175,7 @@ video/3gpp
 Source: [OpenRTB scpecification](https://www.iab.com/wp-content/uploads/2016/03/OpenRTB-API-Specification-Version-2-5-FINAL.pdf)
 
 ### Example
+Below are example JavaScript objects that the Sovrn adapter will translate into JSON.
 
 #### Video instream adUnit
 
