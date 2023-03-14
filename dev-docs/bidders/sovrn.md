@@ -119,9 +119,6 @@ pbjs.bidderSettings = {
 };
 ```
 
-
-
-
 <a name="video" />
 
 ### Video-specific Bid Params
@@ -226,7 +223,7 @@ Without VPAID
 | `5`   | MRAID-2     |
 | `6`   | MRAID-3     |
 
-*source: [OpenRTB scpecification](https://iabtechlab.com/wp-content/uploads/2022/04/OpenRTB-2-6_FINAL.pdf)
+*source: [OpenRTB scpecification](https://www.iab.com/wp-content/uploads/2016/03/OpenRTB-API-Specification-Version-2-5-FINAL.pdf)
 
 <a name="examples" />
 
